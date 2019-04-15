@@ -97,7 +97,7 @@ void copy_input(int *switches) {
         int length = 0;
 
         // Read each line of input char by char
-        while((character = getchar()) != '\n' && character != EOF) {
+        while((character = fgetc(stdin)) != '\n' && character != EOF) {
             input[length] = character;
             input = realloc(input, length + 1); // Increase memory as needed
             length++;
