@@ -193,7 +193,7 @@ int get_words_print_reverse(const char *line) {
     The words are counted and reversed by looping over each
     char and checking for whitespace imediately after a
     non-whitespace char. If a non-whichspace char is followed
-    by whitespace, then consider it part of a word. One a word
+    by whitespace, then consider it part of a word. Once a word
     is found, we loop backwards starting at the index
 
 data table
@@ -213,15 +213,14 @@ backwards          variable - index moving backwards over
 
     // Iterate over every char
     for (int index = 0; index < MAX_CHARS; index++) {
-        /* If the current char is whitespace, and is neither at the begining
-           or preceeded by whitespace, then we have passed a word. */
-        if (is_whitespace(line[index]) == 1 && is_whitespace(line[index - 1]) == 0 && index > 0) {
+        /* If the current char is not whitespace, but the next char is,
+           then we've reached the end of a word. */
+        if (is_whitespace(line[index]) == 0 && is_whitespace(line[index + 1]) == 1 && index > 0) {
             // Write the word by moving backwards through the array
             for (int backwards = index; backwards >= prev_word; backwards--) {
 
-                // Print non-whitespace chars in reverse order
-                if (is_whitespace(line[backwards]) == 0)
-                    printf("%c", line[backwards]);
+                // Print chars in reverse order
+                printf("%c", line[backwards]);
             }
 
             prev_word = index; // Record where the last word ended
