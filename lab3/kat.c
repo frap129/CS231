@@ -50,7 +50,7 @@ void print_file(char *prog_name, char *file_name, int *switches) {
         // Determine if line number should be printed
         if ((switches[N_INDEX] != 0 || switches[B_INDEX] != 0) &&
             (prev_char == '\n' || prev_char == '\0')) {
-        	// Determine if empty lines need numbers
+            // Determine if empty lines need numbers
             if (switches[B_INDEX] == 0 || cur_char != '\n') {
                 printf("     %d\t", line_num); // Print line number
                 line_num++; // Increment line number
@@ -168,7 +168,7 @@ int main(int argc, char *argv[]) {
         else {
             inputs[num_inputs] = argv[arg];
             num_inputs++;
-        } 
+        }
     }
 
     // if no inputs, only handle stdin
