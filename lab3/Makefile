@@ -6,6 +6,6 @@ clean:
 	@echo "Build files removed!" $<
 build:
 	@echo "Compiling..." $<
-	@gcc $(NAME).c -g -o $(NAME) $<
+	@gcc $(NAME).c -g -Wall -Wextra -o $(NAME) $<
 	@echo "Done! Final Binary: ./$(NAME)" $<
 
