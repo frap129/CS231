@@ -11,7 +11,7 @@
 #define E_INDEX 1
 #define N_INDEX 2
 
-void print_file(char *prog_name, char *file_name, int *switches) {
+int print_file(char *prog_name, char *file_name, int *switches, int line_num) {
 /*  print_file opens the givien file name in read mode, and
     passes the contents to stdout one char at a time. While
     outputting, it looks for newline characters so that the
@@ -23,13 +23,13 @@ void print_file(char *prog_name, char *file_name, int *switches) {
  prog_name          parameter - argv[0], the program name.
  file_name          parameter - the file to read and output.
  switches           parameter - the array of switch values.
+ line_num           parameter - the current line number.
  file_pointer       variable - pointer to the data contained in
                                the file located at file_name.
  ending             variable - the line ending, may be "$\n" or
                                "\n" depending on the E switch.
  cur_char           variable - the current character being read.
  prev_char          variable - the character before cur_char.
- line_num           variable - the current line number.
 
  */
     FILE *file_pointer = fopen(file_name, "r"); // Open file in read mode
@@ -37,13 +37,12 @@ void print_file(char *prog_name, char *file_name, int *switches) {
     // Handle non-existent file
     if (file_pointer == NULL) {
        fprintf(stderr, "%s: %s: No such file for directory\n", prog_name, file_name);
-       return;
+       return line_num;
     }
 
     char *ending = switches[E_INDEX] == 1 ? "$\n" : "\n"; // Set line ending
     char cur_char;
     char prev_char = '\0';
-    int line_num = 1;
 
     // Read file until EOF is reached
     while((cur_char = fgetc(file_pointer)) != EOF) {
@@ -66,9 +65,10 @@ void print_file(char *prog_name, char *file_name, int *switches) {
         prev_char = cur_char;
     }
     fclose(file_pointer);
+    return line_num;
 }
 
-void copy_input(int *switches) {
+int copy_input(int *switches, int line_num) {
 /*  copy_input waits for a newline, and stores everything
     that was input before the newline. After looking at the
     values of the switches, it will format the output to
@@ -81,7 +81,7 @@ void copy_input(int *switches) {
  switches           parameter - the array of switch values.
  character          variable - the most recent character that
                                was input.
- line_num           variable - the number of lies input so far.
+ line_num           parameter - the number of lines input so far.
  input              variable - the line of input so far.
  length             variable - the length of the input so far.
  ending             variable - the line ending, may be "$\n" or
@@ -89,7 +89,6 @@ void copy_input(int *switches) {
 
  */
     int character = 0;
-    int line_num = 1;
 
     // Run until Ctrl+D (EOF) is sent
     while (character != EOF) {
@@ -115,6 +114,8 @@ void copy_input(int *switches) {
 
         free(input);
     }
+
+    return line_num;
 }
 
 int main(int argc, char *argv[]) {
@@ -140,6 +141,7 @@ int main(int argc, char *argv[]) {
  num_inputs         variable - the number of inputs.
  arg_len            variable - the length of the argument.
  chars              variable - index of the char being read.
+ line               variable - the running total number of lines.
  input              variable - index of inputs being read.
 
  */
@@ -173,16 +175,17 @@ int main(int argc, char *argv[]) {
         }
     }
 
-    // if no inputs, only handle stdin
+    int line = 1;
+    // If no inputs, only handle stdin
     if (num_inputs == 0)
-        copy_input(switches);
+        copy_input(switches, line);
     else
         // Get each input, one source at a time
         for (int input = 0; input < num_inputs; input++) {
             if (!strcmp(inputs[input], "-"))
-                copy_input(switches);
+                line = copy_input(switches, line);
             else
-                print_file(argv[0], inputs[input], switches);
+                line = print_file(argv[0], inputs[input], switches, line);
         }
 
     free(switches);
