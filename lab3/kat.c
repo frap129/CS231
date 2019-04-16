@@ -101,7 +101,12 @@ int copy_input(int *switches, int line_num) {
             input = realloc(input, length + 1); // Increase memory as needed
             length++;
         }
-        input[length] = '\0';
+
+        // If line is not blank, terminate it.
+        if (length > 0)
+            input[length] = '\0';
+        else
+            return line_num;
 
         char *ending = switches[E_INDEX] != 0 ? "$\n" : "\n"; // Set line ending
 
