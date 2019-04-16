@@ -138,6 +138,7 @@ int main(int argc, char *argv[]) {
  arg                variable - the current argument being read.
  inputs             variable - the list of input sources.
  num_inputs         variable - the number of inputs.
+ arg_len            variable - the length of the argument.
  chars              variable - index of the char being read.
  input              variable - index of inputs being read.
 
@@ -155,9 +156,10 @@ int main(int argc, char *argv[]) {
 
     // Determine whether each argument is a switch or input
     for (int arg = 1; arg < argc; arg++) {
-        if (argv[arg][0] == '-' && strlen(argv[arg]) > 1)
+        if (argv[arg][0] == '-' && strlen(argv[arg]) > 1) {
+            int arg_len = strlen(argv[arg]);
             // Determine which switch was used
-            for (int chars = 1; chars < strlen(argv[arg]); chars++) {
+            for (int chars = 1; chars < arg_len; chars++) {
                 if (argv[arg][chars] == 'b')
                     switches[B_INDEX] = 1;
                 else if (argv[arg][chars] == 'E')
@@ -165,7 +167,7 @@ int main(int argc, char *argv[]) {
                 else if (argv[arg][chars] == 'n')
                     switches[N_INDEX] = 1;
             }
-        else {
+        } else {
             inputs[num_inputs] = argv[arg];
             num_inputs++;
         }
@@ -176,7 +178,7 @@ int main(int argc, char *argv[]) {
         copy_input(switches);
     else
         // Get each input, one source at a time
-        for (int input = 0; input < num_inputs; ++input) {
+        for (int input = 0; input < num_inputs; input++) {
             if (!strcmp(inputs[input], "-"))
                 copy_input(switches);
             else
