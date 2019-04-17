@@ -102,11 +102,11 @@ int copy_input(int *switches, int line_num) {
             length++;
         }
 
-        // If line is not blank, terminate it.
-        if (length > 0)
-            input[length] = '\0';
-        else
+        // If EOF is reached on a blank line, exit early
+        if (length == 0 && character == EOF)
             return line_num;
+        
+        input[length] = '\0';
 
         char *ending = switches[E_INDEX] != 0 ? "$\n" : "\n"; // Set line ending
 
