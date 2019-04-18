@@ -99,6 +99,8 @@ int copy_input(int *switches, int line_num) {
             input = realloc(input, length + 1); // Increase memory as needed
         }
 
+        clearerr(stdin); // Clear error after reaching EOF
+
         // If EOF is reached on a blank line, exit early
         if (length == 0 && character == EOF)
             return line_num;
