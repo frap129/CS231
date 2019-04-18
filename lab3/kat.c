@@ -50,10 +50,8 @@ int print_file(char *prog_name, char *file_name, int *switches, int line_num) {
         if ((switches[N_INDEX] != 0 || switches[B_INDEX] != 0) &&
             (prev_char == '\n' || prev_char == '\0')) {
             // Determine if empty lines need numbers
-            if (switches[B_INDEX] == 0 || cur_char != '\n') {
-                printf("     %d\t", line_num); // Print line number
-                line_num++; // Increment line number
-            }
+            if (switches[B_INDEX] == 0 || cur_char != '\n')
+                printf("     %d\t", line_num++); // Print line number
         }
 
         // Print each char until we reach end of the line
@@ -97,9 +95,8 @@ int copy_input(int *switches, int line_num) {
 
         // Read each line of input char by char
         while((character = fgetc(stdin)) != '\n' && character != EOF) {
-            input[length] = character;
+            input[length++] = character;
             input = realloc(input, length + 1); // Increase memory as needed
-            length++;
         }
 
         // If EOF is reached on a blank line, exit early
@@ -112,8 +109,7 @@ int copy_input(int *switches, int line_num) {
 
         // Determine if line number should be printed
         if (switches[N_INDEX] != 0 || (switches[B_INDEX] != 0 && strlen(input) >= 1)) {
-            printf("     %d\t%s%s", line_num, input, ending); // Print line number
-            line_num++; // Increment line number
+            printf("     %d\t%s%s", line_num++, input, ending); // Print line number
         } else
             printf("%s%s", input, ending);
 
@@ -175,8 +171,7 @@ int main(int argc, char *argv[]) {
                     switches[N_INDEX] = 1;
             }
         } else {
-            inputs[num_inputs] = argv[arg];
-            num_inputs++;
+            inputs[num_inputs++] = argv[arg];
         }
     }
 
