@@ -40,17 +40,17 @@ int print_file(char *prog_name, char *file_name, int *switches, int line_num) {
        return line_num;
     }
 
-    char *ending = switches[E_INDEX] == 1 ? "$\n" : "\n"; // Set line ending
+    char *ending = switches[E_INDEX] ? "$\n" : "\n"; // Set line ending
     char cur_char;
     char prev_char = '\0';
 
     // Read file until EOF is reached
     while((cur_char = fgetc(file_pointer)) != EOF) {
         // Determine if line number should be printed
-        if ((switches[N_INDEX] != 0 || switches[B_INDEX] != 0) &&
+        if ((switches[N_INDEX] || switches[B_INDEX]) &&
             (prev_char == '\n' || prev_char == '\0')) {
             // Determine if empty lines need numbers
-            if (switches[B_INDEX] == 0 || cur_char != '\n')
+            if (!switches[B_INDEX] || cur_char != '\n')
                 printf("     %d\t", line_num++); // Print line number
         }
 
@@ -102,13 +102,13 @@ int copy_input(int *switches, int line_num) {
         // If EOF is reached on a blank line, exit early
         if (length == 0 && character == EOF)
             return line_num;
-        
+
         input[length] = '\0';
 
-        char *ending = switches[E_INDEX] != 0 ? "$\n" : "\n"; // Set line ending
+        char *ending = switches[E_INDEX] ? "$\n" : "\n"; // Set line ending
 
         // Determine if line number should be printed
-        if (switches[N_INDEX] != 0 || (switches[B_INDEX] != 0 && strlen(input) >= 1)) {
+        if (switches[N_INDEX] || (switches[B_INDEX] && strlen(input) >= 1)) {
             printf("     %d\t%s%s", line_num++, input, ending); // Print line number
         } else
             printf("%s%s", input, ending);
