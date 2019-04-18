@@ -86,38 +86,26 @@ int copy_input(int *switches, int line_num) {
                                "\n" depending on the E switch.
 
  */
-    int character = 0;
 
-    // Run until Ctrl+D (EOF) is sent
-    while (character != EOF) {
-        char *input = malloc(1);
-        int length = 0;
+    char input[100];
 
-        // Read each line of input char by char
-        while((character = fgetc(stdin)) != '\n' && character != EOF) {
-            input[length++] = character;
-            input = realloc(input, length + 1); // Increase memory as needed
-        }
-
-        clearerr(stdin); // Clear error after reaching EOF
-
+    while(fgets(input, 100, stdin)) {
+        int length = strlen(input);
         // If EOF is reached on a blank line, exit early
-        if (length == 0 && character == EOF)
+        if (length == 0)
             return line_num;
 
-        input[length] = '\0';
-
+        input[length - 1] = '\0';
         char *ending = switches[E_INDEX] ? "$\n" : "\n"; // Set line ending
 
         // Determine if line number should be printed
-        if (switches[N_INDEX] || (switches[B_INDEX] && strlen(input) >= 1)) {
+        if (switches[N_INDEX] || (switches[B_INDEX] && length >= 1)) {
             printf("%6d\t%s%s", line_num++, input, ending); // Print line number
         } else
             printf("%s%s", input, ending);
-
-        free(input);
     }
 
+    clearerr(stdin); // Clear error after reaching EOF
     return line_num;
 }
 
