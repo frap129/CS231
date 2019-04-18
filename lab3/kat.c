@@ -51,7 +51,7 @@ int print_file(char *prog_name, char *file_name, int *switches, int line_num) {
             (prev_char == '\n' || prev_char == '\0')) {
             // Determine if empty lines need numbers
             if (!switches[B_INDEX] || cur_char != '\n')
-                printf("     %d\t", line_num++); // Print line number
+                printf("%6d\t", line_num++); // Print line number
         }
 
         // Print each char until we reach end of the line
@@ -109,7 +109,7 @@ int copy_input(int *switches, int line_num) {
 
         // Determine if line number should be printed
         if (switches[N_INDEX] || (switches[B_INDEX] && strlen(input) >= 1)) {
-            printf("     %d\t%s%s", line_num++, input, ending); // Print line number
+            printf("%6d\t%s%s", line_num++, input, ending); // Print line number
         } else
             printf("%s%s", input, ending);
 
