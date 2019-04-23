@@ -1,6 +1,6 @@
 /* Joseph Maples
    CS-231 02L
-   Assignment 3 - File Lexer
+   Assignment 4 - File Lexer
  */
 
 #include <ctype.h>

@@ -1,6 +1,6 @@
 /* Joseph Maples
    CS-231 02L
-   Assignment 3 - Dictionary comparator
+   Assignment 4 - Dictionary comparator
  */
 
 #include <ctype.h>
