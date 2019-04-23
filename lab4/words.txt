@@ -1,0 +1,7 @@
+this is a list of words
+more words are possible
+but this will list some
+words dont have numbers like 12345
+vineyard only wants alpha chars
+so contractions like "don't"
+are not words
