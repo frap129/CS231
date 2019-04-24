@@ -52,10 +52,10 @@ character          parameter - the char being checked.
 
 void print_words(FILE *file) {
 /*  print_words reads the file line by line for words.
-    Words are checked by looking for alphabetic characters
-    that are followed by whitespace. Once a word is found,
-    it is printed one char at a tume. The end of the word
-    is recorded in prev word, and the search continues.
+    All alphabetic characters are considered part of a word.
+    Once a word is found, it is printed one char at a time.
+    The end of the word is recorded in prev word, and the
+    search continues.
 
 data table
 
@@ -63,35 +63,27 @@ NAME               DESCRIPTION
 file               parameter - the char being checked.
 size               variable - holds the size of the line.
 line               variable - a line from the file.
-prev_word          variable - index of the end of the last word.
-is_alpha           variable - boolean-style int for whether a
-                              non-alphabetic char was found.
+in_word            variable - boolean-style int for whether the
+                              last char was alphabetic.
 index              variable - index of char being checked.
-letter             variable - index of letter being printed.
 
 */
     size_t size;
     char **line = malloc(sizeof(char*));
     while(getline(line, &size, file) != -1) {
-        int prev_word = 0;
-        int is_alpha = 0;
+        int in_word = 0;
         int length = strlen(line[0]);
 
         for(int index = 0; index < length; index++) {
-            if (!isalpha(line[0][index]) && !is_whitespace(line[0][index]))
-                is_alpha = 1;
-            else if (is_whitespace(line[0][index]))
-                prev_word = index + 1;
-
-            if (!is_alpha && !is_whitespace(line[0][index]) && is_whitespace(line[0][index + 1]) && index > 0) {
-                for (int letter = prev_word; letter <= index; letter++)
-                    printf("%c", line[0][letter]);
+            if (isalpha(line[0][index])) {
+                printf("%c", line[0][index]);
+                in_word = 1;
+            } else if (in_word) {
                 printf("\n");
-                prev_word = index;
-                is_alpha = 0;
+                in_word = 0;
             }
         }
-    }
+    }  
 }
 
 int main(int argc, char *argv[]) {
