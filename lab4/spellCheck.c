@@ -27,13 +27,6 @@ void lex_child(int pipe[2], char *file_name) {
 
 void sort_child(int in_pipe[2], int out_pipe[2]) {
     close(in_pipe[1]);//close write end, lex writes this
-
-    // This prints the output of lex.out
-    /*char *msg = malloc(1024);
-    null_string(msg, 1024);
-    read(in_pipe[0], msg, 1024);
-    printf("%s\n", msg);*/
-
     dup2(in_pipe[0], STDIN_FILENO);
     close(in_pipe[0]);
 
@@ -50,13 +43,6 @@ void sort_child(int in_pipe[2], int out_pipe[2]) {
 
 void uniq_child(int in_pipe[2], int out_pipe[2]) {
     close(in_pipe[1]);//close write end, sort writes this
-
-    // This prints the output of sort
-    char *msg = malloc(1024);
-    null_string(msg, 1024);
-    read(in_pipe[0], msg, 1024);
-    printf("%s\n", msg);
-
     dup2(in_pipe[0], STDIN_FILENO);
     close(in_pipe[0]);
 
@@ -87,6 +73,7 @@ int init_children(char *file, char *dict) {
         return 0;
     } else {
         close(lex[1]);
+        waitpid(lex_pid, NULL, 0);
         pipe(sort);
         sort_pid = fork();
         if (sort_pid == 0) {
@@ -94,25 +81,24 @@ int init_children(char *file, char *dict) {
             return 0;
         } else {
             close(sort[1]);
+            waitpid(sort_pid, NULL, 0);
             pipe(uniq);
             uniq_pid = fork();
-            if (uniq_pid == 1) {
+            if (uniq_pid == 0) {
                 uniq_child(sort, uniq);
                 return 0;
             } else {
                 close(uniq[1]);
-                
+                waitpid(uniq_pid, NULL, 0);
                 // Prints the output of sort for debugging
                 char *msg = malloc(1024);
                 null_string(msg, 1024);
-                read(sort[0], msg, 1024);
+                read(uniq[0], msg, 1024);
                 printf("%s", msg);
                 close(lex[0]);
                 close(sort[0]);
                 close(uniq[0]);
                 int signal;
-                //waitpid((pid_t) 0, &signal, WEXITED); // need to write the loop
-                wait(&signal);
                 return 0;
             }
         }
