@@ -64,6 +64,15 @@ void compare_child(int pipe[2], char *dict_name) {
     execv(args[0], args);
 }
 
+void write_log(int lex_pid, int sort_pid, int uniq_pid, int compare_pid) {
+    FILE *log = fopen("spellCheck.log", "w"); // Open log in write mode
+    fprintf(log, "lex.out pid: %d\n", lex_pid);
+    fprintf(log, "sort pid: %d\n", sort_pid);
+    fprintf(log, "uniq pid: %d\n", uniq_pid);
+    fprintf(log, "compare pid: %d\n", compare_pid);
+    fclose(log);
+}
+
 void init_children(char *file, char *dict) {
     pid_t lex_pid;
     pid_t sort_pid;
@@ -78,7 +87,6 @@ void init_children(char *file, char *dict) {
 
     if (lex_pid == 0) {
         lex_child(lex2sort, file);
-        return;
     } else {
         close(lex2sort[1]);
         waitpid(lex_pid, NULL, 0);
@@ -86,7 +94,6 @@ void init_children(char *file, char *dict) {
         sort_pid = fork();
         if (sort_pid == 0) {
             sort_child(lex2sort, sort2uniq);
-            return;
         } else {
             close(sort2uniq[1]);
             waitpid(sort_pid, NULL, 0);
@@ -94,20 +101,18 @@ void init_children(char *file, char *dict) {
             uniq_pid = fork();
             if (uniq_pid == 0) {
                 uniq_child(sort2uniq, uniq2compare);
-                return;
             } else {
                 close(uniq2compare[1]);
                 waitpid(uniq_pid, NULL, 0);
                 compare_pid = fork();
-                if(compare_pid == 0){
+                if(compare_pid == 0) {
                     compare_child(uniq2compare, dict);
-                    return;
                 } else {
                     waitpid(compare_pid, NULL, 0);
                     close(lex2sort[0]);
                     close(sort2uniq[0]);
                     close(uniq2compare[0]);
-                    return;
+                    write_log(lex_pid, sort_pid, uniq_pid, compare_pid);
                 }
             }
         }
