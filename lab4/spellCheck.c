@@ -8,11 +8,6 @@
 #include <unistd.h>
 #include <sys/wait.h>
 
-void null_string(char *string, int size) {
-    for (int i = 0; i < size; i++)
-        string[i] = '\0';
-}
-
 void lex_child(int pipe[2], char *file_name) {
     close(pipe[0]); //close read end, sort reads this
     dup2(pipe[1], STDOUT_FILENO);
@@ -57,49 +52,63 @@ void uniq_child(int in_pipe[2], int out_pipe[2]) {
     execvp(args[0], args); 
 }
 
-int init_children(char *file, char *dict) {
+void compare_child(int pipe[2], char *dict_name) {
+    close(pipe[1]); //close write end, uniq writes this
+    dup2(pipe[0], STDIN_FILENO);
+    close(pipe[0]);
+
+    char *args[3];
+    args[0] = "./compare.out";
+    args[1] = dict_name;
+    args[2] = NULL;
+    execv(args[0], args);
+}
+
+void init_children(char *file, char *dict) {
     pid_t lex_pid;
     pid_t sort_pid;
     pid_t uniq_pid;
-    int lex[2];
-    int sort[2];
-    int uniq[2];
+    pid_t compare_pid;
+    int lex2sort[2];
+    int sort2uniq[2];
+    int uniq2compare[2];
 
-    pipe(lex);
+    pipe(lex2sort);
     lex_pid = fork();
 
     if (lex_pid == 0) {
-        lex_child(lex, file);
-        return 0;
+        lex_child(lex2sort, file);
+        return;
     } else {
-        close(lex[1]);
+        close(lex2sort[1]);
         waitpid(lex_pid, NULL, 0);
-        pipe(sort);
+        pipe(sort2uniq);
         sort_pid = fork();
         if (sort_pid == 0) {
-            sort_child(lex, sort);
-            return 0;
+            sort_child(lex2sort, sort2uniq);
+            return;
         } else {
-            close(sort[1]);
+            close(sort2uniq[1]);
             waitpid(sort_pid, NULL, 0);
-            pipe(uniq);
+            pipe(uniq2compare);
             uniq_pid = fork();
             if (uniq_pid == 0) {
-                uniq_child(sort, uniq);
-                return 0;
+                uniq_child(sort2uniq, uniq2compare);
+                return;
             } else {
-                close(uniq[1]);
+                close(uniq2compare[1]);
                 waitpid(uniq_pid, NULL, 0);
-                // Prints the output of sort for debugging
-                char *msg = malloc(1024);
-                null_string(msg, 1024);
-                read(uniq[0], msg, 1024);
-                printf("%s", msg);
-                close(lex[0]);
-                close(sort[0]);
-                close(uniq[0]);
-                int signal;
-                return 0;
+                compare_pid = fork();
+                if(compare_pid == 0){
+                    compare_child(uniq2compare, dict);
+                    return;
+                } else {
+                    waitpid(compare_pid, NULL, 0);
+                    close(lex2sort[0]);
+                    close(sort2uniq[0]);
+                    close(uniq2compare[0]);
+                    return;
+                }
             }
         }
     }
