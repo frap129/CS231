@@ -8,10 +8,14 @@
 #include <unistd.h>
 #include <sys/wait.h>
 
+void dup_and_close(int unused, int dest, int src) {
+    close(unused); // close unused end
+    dup2(dest, src);
+    close(dest);
+}
+
 void lex_child(int pipe[2], char *file_name) {
-    close(pipe[0]); //close read end, sort reads this
-    dup2(pipe[1], STDOUT_FILENO);
-    close(pipe[1]);
+    dup_and_close(pipe[0], pipe[1], STDOUT_FILENO);
 
     char *args[3];
     args[0] = "./lex.out";
@@ -21,13 +25,8 @@ void lex_child(int pipe[2], char *file_name) {
 }
 
 void sort_child(int in_pipe[2], int out_pipe[2]) {
-    close(in_pipe[1]);//close write end, lex writes this
-    dup2(in_pipe[0], STDIN_FILENO);
-    close(in_pipe[0]);
-
-    close(out_pipe[0]); //close read end, uniq reads this
-    dup2(out_pipe[1], STDOUT_FILENO);
-    close(out_pipe[1]);
+    dup_and_close(in_pipe[1], in_pipe[0], STDIN_FILENO);
+    dup_and_close(out_pipe[0], out_pipe[1], STDOUT_FILENO);
 
     char *args[3];
     args[0] = "sort";
@@ -37,13 +36,8 @@ void sort_child(int in_pipe[2], int out_pipe[2]) {
 }
 
 void uniq_child(int in_pipe[2], int out_pipe[2]) {
-    close(in_pipe[1]);//close write end, sort writes this
-    dup2(in_pipe[0], STDIN_FILENO);
-    close(in_pipe[0]);
-
-    close(out_pipe[0]); //close read end, compare reads this
-    dup2(out_pipe[1], STDOUT_FILENO);
-    close(out_pipe[1]);
+    dup_and_close(in_pipe[1], in_pipe[0], STDIN_FILENO);
+    dup_and_close(out_pipe[0], out_pipe[1], STDOUT_FILENO);
 
     char *args[3];
     args[0] = "uniq";
@@ -53,9 +47,7 @@ void uniq_child(int in_pipe[2], int out_pipe[2]) {
 }
 
 void compare_child(int pipe[2], char *dict_name) {
-    close(pipe[1]); //close write end, uniq writes this
-    dup2(pipe[0], STDIN_FILENO);
-    close(pipe[0]);
+    dup_and_close(pipe[1], pipe[0], STDIN_FILENO);
 
     char *args[3];
     args[0] = "./compare.out";
