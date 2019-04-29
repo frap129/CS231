@@ -17,10 +17,7 @@ void dup_and_close(int unused, int dest, int src) {
 void lex_child(int pipe[2], char *file_name) {
     dup_and_close(pipe[0], pipe[1], STDOUT_FILENO);
 
-    char *args[3];
-    args[0] = "./lex.out";
-    args[1] = file_name;
-    args[2] = NULL;
+    char *args[3] = {"./lex.out", file_name, NULL};
     execv(args[0], args);
 }
 
@@ -28,10 +25,7 @@ void sort_child(int in_pipe[2], int out_pipe[2]) {
     dup_and_close(in_pipe[1], in_pipe[0], STDIN_FILENO);
     dup_and_close(out_pipe[0], out_pipe[1], STDOUT_FILENO);
 
-    char *args[3];
-    args[0] = "sort";
-    args[1] = "-f"; // Ignore case
-    args[2] = NULL;
+    char *args[3] = {"sort", "-f", NULL};
     execvp(args[0], args); 
 }
 
@@ -39,20 +33,14 @@ void uniq_child(int in_pipe[2], int out_pipe[2]) {
     dup_and_close(in_pipe[1], in_pipe[0], STDIN_FILENO);
     dup_and_close(out_pipe[0], out_pipe[1], STDOUT_FILENO);
 
-    char *args[3];
-    args[0] = "uniq";
-    args[1] = "-i"; // Ignore case
-    args[2] = NULL;
+    char *args[3] = {"uniq", "-i", NULL};
     execvp(args[0], args); 
 }
 
 void compare_child(int pipe[2], char *dict_name) {
     dup_and_close(pipe[1], pipe[0], STDIN_FILENO);
 
-    char *args[3];
-    args[0] = "./compare.out";
-    args[1] = dict_name;
-    args[2] = NULL;
+    char *args[3] = {"./compare.out", dict_name, NULL};
     execv(args[0], args);
 }
 
