@@ -9,12 +9,38 @@
 #include <sys/wait.h>
 
 void dup_and_close(int unused, int dest, int src) {
+/*  dup _and_close closes the unused end of a pipe and
+    duplicates the given src to the given dest. This
+    sequence of lines was repeated in all children,
+    so commonizing it to a single function was logical.
+
+data table
+
+NAME               DESCRIPTION
+unused             parameter - the unused pipe end.
+dest               parameter - the used pipe end.
+src                parameter - the file descriptor to connect
+                               the used pipe end to.
+
+*/
     close(unused); // close unused end
     dup2(dest, src);
     close(dest);
 }
 
 void lex_child(int pipe[2], char *file_name) {
+/*  lex_child configures the pipes and arguments for
+    the child process that runs lex, and executes
+    lex.out.
+
+data table
+
+NAME               DESCRIPTION
+pipe               parameter - the pipe to feed stdout to.
+file_name          parameter - the value of argv[1], a file name.
+args               variable - arguments for executing lex.out.
+
+*/
     dup_and_close(pipe[0], pipe[1], STDOUT_FILENO);
 
     char *args[3] = {"./lex.out", file_name, NULL};
@@ -22,6 +48,18 @@ void lex_child(int pipe[2], char *file_name) {
 }
 
 void sort_child(int in_pipe[2], int out_pipe[2]) {
+/*  sort_child configures the pipes and arguments for
+    the child process that runs sort, and executes
+    sort -f.
+
+data table
+
+NAME               DESCRIPTION
+in_pipe            parameter - the pipe to feed to stdin.
+out_pipe           parameter - the the pipe to feed stdout to.
+args               variable - arguments for executing sort. 
+
+*/
     dup_and_close(in_pipe[1], in_pipe[0], STDIN_FILENO);
     dup_and_close(out_pipe[0], out_pipe[1], STDOUT_FILENO);
 
@@ -30,6 +68,18 @@ void sort_child(int in_pipe[2], int out_pipe[2]) {
 }
 
 void uniq_child(int in_pipe[2], int out_pipe[2]) {
+/*  uniq_child configures the pipes and arguments for
+    the child process that runs uniq, and executes
+    uniq -i.
+
+data table
+
+NAME               DESCRIPTION
+in_pipe            parameter - the pipe to feed to stdin.
+out_pipe           parameter - the the pipe to feed stdout to.
+args               variable - arguments for executing uniq.
+
+*/
     dup_and_close(in_pipe[1], in_pipe[0], STDIN_FILENO);
     dup_and_close(out_pipe[0], out_pipe[1], STDOUT_FILENO);
 
@@ -38,6 +88,18 @@ void uniq_child(int in_pipe[2], int out_pipe[2]) {
 }
 
 void compare_child(int pipe[2], char *dict_name) {
+/*  compare_child configures the pipes and arguments
+    for the child process that runs compare, and
+    executes compare.out.
+
+data table
+
+NAME               DESCRIPTION
+pipe               parameter - the pipe to feed stdout to.
+dict_name          parameter - the value of argv[2], the dictionary name.
+args               variable - arguments for executing lex.out
+
+*/
     dup_and_close(pipe[1], pipe[0], STDIN_FILENO);
 
     char *args[3] = {"./compare.out", dict_name, NULL};
@@ -45,6 +107,20 @@ void compare_child(int pipe[2], char *dict_name) {
 }
 
 void write_log(int lex_pid, int sort_pid, int uniq_pid, int compare_pid) {
+/*  write_log opens a file discriptor to a file named
+    "spellCheck.log" and writes the name and PID of
+    every child to the file in order of execution.
+
+data table
+
+NAME               DESCRIPTION
+lex_pid            parameter - the PID of the lex child.
+sort_pid           parameter - the PID of the sort child.
+uniq_pid           parameter - the PID of the uniq child.
+compare_pid        parameter - the PID of the compare child.
+log                variable - file descriptor to spellCheck.log.
+
+*/
     FILE *log = fopen("spellCheck.log", "w"); // Open log in write mode
     fprintf(log, "lex.out pid: %d\n", lex_pid);
     fprintf(log, "sort pid: %d\n", sort_pid);
@@ -54,6 +130,30 @@ void write_log(int lex_pid, int sort_pid, int uniq_pid, int compare_pid) {
 }
 
 void init_children(char *file, char *dict) {
+/*  init_children first initializes a pipe that will
+    connect the lex child to the sort child, then forks
+    the lex child. The parent process then initializes
+    a pipe that will connect the sort child to the uniq
+    child, then fork the sort child. Next, the parent
+    initializes a pipe that will connect the uniq child
+    to the compare child and forks the uniq child.
+    Finally, the parent forks the compare child and
+    writes all child PIDs to the log.
+
+data table
+
+NAME               DESCRIPTION
+file               parameter - the value of argv[1], a file name.
+dict               parameter - the value of argv[2], the dictionary name.
+lex_pid            parameter - the PID of the lex child.
+sort_pid           parameter - the PID of the sort child.
+uniq_pid           parameter - the PID of the uniq child.
+compare_pid        parameter - the PID of the compare child.
+lex2sort           variable - pipe from lex to sort.
+sort2uniq          variable - pipe from sort to uniq.
+uniq2compare       variable - prpe from uniq to compare.
+
+*/
     pid_t lex_pid;
     pid_t sort_pid;
     pid_t uniq_pid;
@@ -100,6 +200,21 @@ void init_children(char *file, char *dict) {
 }
 
 int main(int argc, char *argv[]) {
+/*  main first checks that the correct number of
+    arguments were supplied to the program, and
+    will exit if too few or too many were given.
+    If 2 args were specified, they get assigned to
+    strings and passed to init_children.
+
+data table
+
+NAME               DESCRIPTION
+argc               parameter - the number of args supplied.
+argv               parameter - the arguments supplied.
+input              parameter - the value of argv[1], a file name.
+dictionary         parameter - the value of argv[2], the dictionary name.
+
+*/
     if (argc < 3) {
         fprintf(stderr, "%s: Less than two files supplied\n", argv[0]);
         exit(1);
