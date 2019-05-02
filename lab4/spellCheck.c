@@ -57,14 +57,14 @@ data table
 NAME               DESCRIPTION
 in_pipe            parameter - the pipe to feed to stdin.
 out_pipe           parameter - the the pipe to feed stdout to.
-args               variable - arguments for executing sort. 
+args               variable - arguments for executing sort.
 
 */
     dup_and_close(in_pipe[1], in_pipe[0], STDIN_FILENO);
     dup_and_close(out_pipe[0], out_pipe[1], STDOUT_FILENO);
 
     char *args[3] = {"sort", "-f", NULL};
-    execvp(args[0], args); 
+    execvp(args[0], args);
 }
 
 void uniq_child(int in_pipe[2], int out_pipe[2]) {

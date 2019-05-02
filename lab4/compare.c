@@ -8,6 +8,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#define	MAX_LEN 100
+
 FILE* open_file(char *prog_name, char *file_name) {
 /*  open_file opens a pointer to the requested file name
     and makes sure the file exists. If the file does not
@@ -71,7 +73,7 @@ lower_word         variable - the lowercase word.
 }
 
 void compare_words(FILE *dict) {
-/*  compare_words takes a line from standard in, which 
+/*  compare_words takes a line from standard in, which
     should be a single word, and compares it to every word
     in the provided dictionary file until a match is found
     or we run out of words to compare. If a word does not
@@ -85,19 +87,19 @@ dict_word          variable - a word from the dictionary file.
 word               variable - a word from stdin.
 is_word            variable - boolean-style int for recording
                               whether a word was spelled
-                              correctly or not. 
+                              correctly or not.
 
 */
-    char dict_word[20];
-    char word[20];
-    while(fgets(word, 20, stdin) != NULL) {
+    char dict_word[MAX_LEN];
+    char word[MAX_LEN];
+    while(fgets(word, MAX_LEN, stdin) != NULL) {
         int is_word = 0;
-        while(fgets(dict_word, 20, dict)) {
+        while(fgets(dict_word, MAX_LEN, dict)) {
             if (!strcmp(to_lower(word), to_lower(dict_word))) {
                 is_word = 1;
                 break;
             }
-        } 
+        }
         rewind(dict);
         if (is_word)
             printf("Correct: %s", word);
