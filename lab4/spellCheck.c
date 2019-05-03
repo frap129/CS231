@@ -21,7 +21,7 @@ file_name          parameter - the value of argv[1], a file name.
 args               variable - arguments for executing lex.out.
 
 */
-    close(pipe[0]); //close read end, sort reads this
+    close(pipe[0]); // Close read end, sort reads this
     dup2(pipe[1], STDOUT_FILENO);
     close(pipe[1]);
 
@@ -45,7 +45,7 @@ args               variable - arguments for executing sort.
     dup2(in_pipe[0], STDIN_FILENO);
     close(in_pipe[0]);
 
-    close(out_pipe[0]); //close read end, uniq reads this
+    close(out_pipe[0]); // Close read end, uniq reads this
     dup2(out_pipe[1], STDOUT_FILENO);
     close(out_pipe[1]);
 
@@ -69,7 +69,7 @@ args               variable - arguments for executing uniq.
     dup2(in_pipe[0], STDIN_FILENO);
     close(in_pipe[0]);
 
-    close(out_pipe[0]); //close read end, compare reads this
+    close(out_pipe[0]); // Close read end, compare reads this
     dup2(out_pipe[1], STDOUT_FILENO);
     close(out_pipe[1]);
 
@@ -159,30 +159,36 @@ uniq2compare       variable - prpe from uniq to compare.
     if (lex_pid == 0) {
         lex_child(lex2sort, file);
     } else {
-        close(lex2sort[1]);
+        close(lex2sort[1]); // Close write end, lex writes to this
         waitpid(lex_pid, NULL, 0);
         pipe(sort2uniq);
         sort_pid = fork();
+
         if (sort_pid == 0) {
             sort_child(lex2sort, sort2uniq);
         } else {
-            close(sort2uniq[1]);
+            close(sort2uniq[1]); // Close write end, sort writes to this
             waitpid(sort_pid, NULL, 0);
             pipe(uniq2compare);
             uniq_pid = fork();
+
             if (uniq_pid == 0) {
                 uniq_child(sort2uniq, uniq2compare);
             } else {
-                close(uniq2compare[1]);
+                close(uniq2compare[1]); // Close write end, uniq writes to this
                 waitpid(uniq_pid, NULL, 0);
                 compare_pid = fork();
+
                 if(compare_pid == 0) {
                     compare_child(uniq2compare, dict);
                 } else {
                     waitpid(compare_pid, NULL, 0);
+
+                    // Close read ends, only used by child processes
                     close(lex2sort[0]);
                     close(sort2uniq[0]);
                     close(uniq2compare[0]);
+
                     write_log(lex_pid, sort_pid, uniq_pid, compare_pid);
                 }
             }
@@ -206,6 +212,7 @@ input              parameter - the value of argv[1], a file name.
 dictionary         parameter - the value of argv[2], the dictionary name.
 
 */
+    // Verify arguments
     if (argc < 3) {
         fprintf(stderr, "%s: Less than two files supplied\n", argv[0]);
         exit(1);
@@ -213,6 +220,7 @@ dictionary         parameter - the value of argv[2], the dictionary name.
         fprintf(stderr, "%s: More than two files supplied\n", argv[0]);
         exit(1);
     }
+
     char *input = argv[1];
     char *dictionary = argv[2];
     init_children(input, dictionary);
