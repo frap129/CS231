@@ -42,7 +42,6 @@ out_pipe           parameter - the the pipe to feed stdout to.
 args               variable - arguments for executing sort.
 
 */
-    close(in_pipe[1]);//close write end, lex writes this
     dup2(in_pipe[0], STDIN_FILENO);
     close(in_pipe[0]);
 
@@ -67,7 +66,6 @@ out_pipe           parameter - the the pipe to feed stdout to.
 args               variable - arguments for executing uniq.
 
 */
-    close(in_pipe[1]);//close write end, sort writes this
     dup2(in_pipe[0], STDIN_FILENO);
     close(in_pipe[0]);
 
@@ -92,7 +90,6 @@ dict_name          parameter - the value of argv[2], the dictionary name.
 args               variable - arguments for executing lex.out
 
 */
-    close(pipe[1]); //close write end, uniq writes this
     dup2(pipe[0], STDIN_FILENO);
     close(pipe[0]);
 
