@@ -35,23 +35,6 @@ file_pointer       variable - pointer to the file file_name.
     return file_pointer;
 }
 
-int is_whitespace(const char character) {
-/*  is_whitespace checks whether a given char is a space, tab,
-    newline, or 0-byte char. Returns 1 if true, 0 if false.
-
-data table
-
-NAME               DESCRIPTION
-character          parameter - the char being checked.
-
-*/
-    if (character == ' ' || character == '\t' ||
-        character == '\0' || character == '\n') {
-        return 1;
-    }
-    return 0;
-}
-
 char *to_lower(char *word) {
 /*  to_lower converts all chars in a string to lowercase,
     and returns the lower case string.
