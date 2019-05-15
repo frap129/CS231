@@ -1,0 +1,16 @@
+this is a list of words
+more words are possible
+but this will list some
+words dont have numbers like 12345
+Dr. Vineyard only wants alpha chars
+so contractions like "don't"
+are not one word but tWO!
+Dr. Vineyard says that mIxED CAsE is a large source of ERrOr,
+but I think I can handle that.
+
+A key part of making this work on other machines
+is executing sort and uniq without a full path.
+Mine are in /usr/bin/, which is probably true of most
+Linux users. But then there's Macs, good ol' macintosh.
+I've never used sort or uniq on a mac. I'm sure `which`
+would tell me where they are.
