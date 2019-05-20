@@ -1,3 +1,4 @@
+-- Written by Joseph Maples for CS231
 import Data.List
 import Data.Char
 import System.Environment
@@ -82,8 +83,8 @@ insensitiveUniq = map head . insensitiveGroup . insensitiveSort
 spellCheck :: [String] -> [String] -> [String]
 spellCheck [] _ = []
 spellCheck (word:words) dict
-    | elem (map toLower word) dict = ("Correct: " ++ word) : spellCheck words dict
-    | otherwise = ("Incorrect: " ++ word) : spellCheck words dict
+  | elem (map toLower word) dict = ("Correct: " ++ word) : spellCheck words dict
+  | otherwise = ("Incorrect: " ++ word) : spellCheck words dict
 
 {-
     main is the controlling function of the program.
