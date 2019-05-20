@@ -51,38 +51,26 @@ character          parameter - the char being checked.
 }
 
 void print_words(FILE *file) {
-/*  print_words reads the file line by line for words.
-    All alphabetic characters are considered part of a word.
-    Once a word is found, it is printed one char at a time.
-    The end of the word is recorded in prev word, and the
-    search continues.
+/*  print_words simply prints all alphabetic chars, or a \n
+    when the char is not alphabetic. Thanks for making me
+    feel dumb Dr. Vineyard.
 
 data table
 
 NAME               DESCRIPTION
-file               parameter - the char being checked.
-size               variable - holds the size of the line.
-line               variable - a line from the file.
-in_word            variable - boolean-style int for whether the
-                              last char was alphabetic.
-index              variable - index of char being checked.
+file               parameter - the file being checked.
+cur_char           variable - a char from the file.
+prev_char          variable - the previous char.
 
 */
-    size_t size;
-    char **line = malloc(sizeof(char*));
-    while(getline(line, &size, file) != -1) {
-        int in_word = 0;
-        int length = strlen(line[0]);
-
-        for(int index = 0; index < length; index++) {
-            if (isalpha(line[0][index])) {
-                printf("%c", line[0][index]);
-                in_word = 1;
-            } else if (in_word) {
-                printf("\n");
-                in_word = 0;
-            }
-        }
+    char cur_char;
+    char prev_char;
+    while((cur_char = fgetc(file)) != EOF) {
+        if (isalpha(cur_char))
+            printf("%c", cur_char);
+        else if (isalpha(prev_char))
+            printf("\n");
+        prev_char = cur_char;
     }  
 }
 
