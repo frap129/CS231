@@ -54,18 +54,22 @@ gameLoop :: [String] -> String -> Int -> String
 gameLoop _ _ 0 = "Sorry, you loose."
 gameLoop availWords userWord guesses
     | not $ elem '-' userWord = "You win!"
-    | otherwise             = do
+    | otherwise               = do
         putStrLn "Input a guess:"
         guess <- getLine
         let newWords = largestFamily guess availWords
+        let newUserWord = userView guess userWord $ head newWords
+        let newGuesses = guesses
+        
         if checkGuess guess newWords then do
-            putStrLn "Correct! Word: " ++ userView guess userWord (head newWords)
-            putStrLn "Guesses remaining: " ++ show guesses
-            gameLoop newWords (userView guess userWord head (newWords)) guesses
-        else
-            putStr "Incorrect! Word: " ++ userWord
-            putStrLn "Guesses remaining: " ++ show (guesses - 1)
-            gameLoop (largestFamily guess availWords) userWord (guesses - 1)
+            putStrLn $"Correct! Word: " ++ userView guess userWord (head newWords)
+            putStrLn $ "Guesses remaining: " ++ show guesses
+        else do
+            let newGuesses = guesses - 1
+            putStrLn $ "Incorrect! Word: " ++ userWord
+            putStrLn $ "Guesses remaining: " ++ show (guesses - 1)
+            
+        gameLoop newWords newUserWord newGuesses
 
 main = do
     args <- getArgs
@@ -84,4 +88,4 @@ main = do
     else
         return ()
 
-    gameLoop dictWords (replicate wordLen '_') numGuess
+    putStrLn $ gameLoop dictWords (replicate wordLen '_') numGuess
