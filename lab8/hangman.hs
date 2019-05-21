@@ -18,14 +18,14 @@ checkArgs [_, _, _, s]
 checkArgs _ = 0
 
 splitArgs :: [String] -> (String, Int, Int, Bool)
-splitArgs [x, y, z] = (x, (read y), (read x), False) 
-splitArgs [a, b, c, d] = (a, (read b), (read c), True)
+splitArgs [a, b, c, d] = (a, (read b), (read c), (d == "-s"))
+splitArgs [a, b, c, d, e] = (a, (read b), (read c), (d == "-s"))
 
 userView :: String -> String -> String -> String
 userView _ _ [] = []
-userView letter (x:xs) (y:ys)
-    | letter!!0 == y = (letter ++ " " ++ userView letter xs ys)
-    | otherwise      = (x : ' ' : userView letter xs ys)
+userView letter (x:xs:xss) (y:ys)
+    | letter!!0 == y = (letter ++ " " ++ userView letter xss ys)
+    | otherwise      = (x : xs : userView letter xss ys)
 
 wordView :: String -> String -> String
 wordView letter word = map (\x -> if elem x letter then x else '_') word
@@ -50,17 +50,17 @@ sortByLength a = sortBy (compare `on` length) a
 rightLenWords :: [String] -> Int -> [String]
 rightLenWords a len = [x | x <- a, length x == len]
 
-gameLoop :: [String] -> String -> Int -> String
-gameLoop _ _ 0 = "Sorry, you loose."
+gameLoop :: [String] -> String -> Int -> IO ()
+gameLoop _ _ 0 = do putStrLn "Sorry, you loose."
 gameLoop availWords userWord guesses
-    | not $ elem '-' userWord = "You win!"
+    | not $ elem '_' userWord = do putStrLn "You win!"
     | otherwise               = do
         putStrLn "Input a guess:"
         guess <- getLine
         let newWords = largestFamily guess availWords
         let newUserWord = userView guess userWord $ head newWords
-        let newGuesses = guesses
-        
+        let newGuesses = if checkGuess guess newWords then guesses else guesses - 1
+
         if checkGuess guess newWords then do
             putStrLn $"Correct! Word: " ++ userView guess userWord (head newWords)
             putStrLn $ "Guesses remaining: " ++ show guesses
@@ -79,7 +79,7 @@ main = do
     else
         return ()
 
-    let (dictName, wordLen, numGuess, debug) = splitArgs args 
+    let (dictName, wordLen, numGuess, debug) = splitArgs (args ++ ["no"])
     dictContent <- readFile dictName
     let dictWords = rightLenWords (lines dictContent) wordLen
 
@@ -88,4 +88,5 @@ main = do
     else
         return ()
 
-    putStrLn $ gameLoop dictWords (replicate wordLen '_') numGuess
+    gameLoop dictWords (concat $replicate wordLen "_ ") numGuess
+    return ()
