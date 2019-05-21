@@ -28,7 +28,7 @@ userView :: Char -> String -> String -> String
 userView _ _ [] = []
 userView letter (x:xs:xss) (y:ys)
     | (toUpper letter) == (toUpper y) = (toUpper letter) : ' ' : userView letter xss ys
-    | otherwise             = x : xs : userView letter xss ys
+    | otherwise                       = x : xs : userView letter xss ys
 
 wordView :: Char -> String -> String
 wordView letter word = map (\x -> if x == letter then x else '_') word
@@ -45,7 +45,7 @@ largestFamily guessed words = head $ map snd $ sortByLength $ Map.toList $ wordF
 checkGuess :: Char -> [String] -> Bool
 checkGuess guess availWords
     | elem guess (availWords!!0) = True
-    | otherwise                       = False
+    | otherwise                  = False
 
 sortByLength :: [(String, [String])] -> [(String, [String])]
 sortByLength a = sortBy (compare `on` length) a
@@ -55,6 +55,14 @@ rightLenWords a len = [x | x <- a, length x == len]
 
 hiddenString :: Int -> String
 hiddenString len = (concat $ replicate len "_ ")
+
+afterGuess :: String -> Int -> String -> String -> Bool -> Int -> IO ()
+afterGuess prefix numGuess newGuesses userWord debug familySize = do
+    putStrLn $ prefix ++ "Guesses remaining: " ++ show numGuess
+    putStrLn $ "Letters guessed: " ++ newGuesses
+    putStrLn $ "Word so far: " ++ userWord
+    if debug then do putStrLn $ "Words in family: " ++ show familySize
+    else return ()
 
 gameLoop :: [String] -> String -> String -> Int -> Bool -> IO ()
 gameLoop availWords _ _ 0 _ = do putStrLn $ "Sorry, the word was " ++ head availWords
@@ -71,13 +79,7 @@ gameLoop availWords userWord guesses numGuess debug
         let prefix = if checkGuess guess newWords then "Correct! " else "Incorrect! "
         let newGuesses = userView guess guesses alphabet
 
-        putStrLn $ prefix ++ "Guesses remaining: " ++ show newNumGuess
-        putStrLn $ "Letters guessed: " ++ newGuesses
-        putStrLn $ "Word so far: " ++ userView guess userWord (head newWords)
-
-        if debug then do putStrLn $ "Words in family: " ++ show (length newWords)
-        else return ()
-
+        afterGuess prefix newNumGuess newGuesses newUserWord debug (length newWords)
         gameLoop newWords newUserWord newGuesses newNumGuess debug
 
 main = do
