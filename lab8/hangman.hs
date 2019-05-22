@@ -27,17 +27,11 @@ splitArgs [a, b, c, d, e] = (a, (read b), (read c), (d == "-s"))
 userView :: Char -> String -> String -> String
 userView _ _ [] = []
 userView letter (x:xs:xss) (y:ys)
-    | (toUpper letter) == (toUpper y) = (toUpper letter) : ' ' : userView letter xss ys
-    | otherwise                       = x : xs : userView letter xss ys
-
-wordView :: Char -> String -> String
-wordView letter word = map (\x -> if x == letter then x else '_') word
-
-insertFamily :: Char -> String -> Map.Map String [String] -> Map.Map String [String]
-insertFamily guessed word = Map.insertWith (++) (wordView guessed word) [word]
+    | letter == y = letter : ' ' : userView letter xss ys
+    | otherwise   = x : xs : userView letter xss ys
 
 wordFamilies :: Char -> [String] -> Map.Map String [String]
-wordFamilies guessed words = foldr (insertFamily guessed) Map.empty words
+wordFamilies guessed words = foldr (\i -> Map.insertWith (++) (map (\x -> if x == guessed then x else '_') i) [i]) Map.empty words
 
 largestFamily :: Char -> [String] -> [String]
 largestFamily guessed words = head $ map snd $ sortByLength $ Map.toList $ wordFamilies guessed words
@@ -64,15 +58,24 @@ afterGuess prefix numGuess newGuesses userWord debug familySize = do
     if debug then do putStrLn $ "Words in family: " ++ show familySize
     else return ()
 
+askGuess :: String -> IO Char
+askGuess prevGuesses = do
+    putStrLn "Enter a guess:"
+    anyCase <- getLine
+    let guess = toUpper (anyCase!!0)
+    if elem guess prevGuesses then
+        askGuess prevGuesses
+    else if not $ isAlpha guess then
+        askGuess prevGuesses
+    else
+        return guess
+
 gameLoop :: [String] -> String -> String -> Int -> Bool -> IO ()
 gameLoop availWords _ _ 0 _ = do putStrLn $ "Sorry, the word was " ++ head availWords
 gameLoop availWords userWord guesses numGuess debug
     | not $ elem '_' userWord = do putStrLn "You win!"
     | otherwise               = do
-        putStrLn "Input a guess:"
-        uncheckedGuess <- getLine
-
-        let guess = uncheckedGuess!!0
+        guess <- askGuess guesses
         let newWords = largestFamily guess availWords
         let newUserWord = userView guess userWord $ head newWords
         let newNumGuess = if checkGuess guess newWords then numGuess else numGuess - 1
@@ -92,8 +95,7 @@ main = do
 
     let (dictName, wordLen, numGuess, debug) = splitArgs (args ++ ["no"])
     dictContent <- readFile dictName
-    let dictWords = rightLenWords (lines dictContent) wordLen
-
+    let dictWords = map (map toUpper) $ rightLenWords (lines dictContent) wordLen
 
     if dictWords == [] then do
         die "The dictionary doesn\'t have any words of that length"
