@@ -10,7 +10,7 @@ import System.IO
     split at any non-alphabetic character.
     The case expression uses dropWhile to drop
     all preceeding non-alpha chars. The main
-    spliting case splits the works by traversing
+    spliting case splits the words by traversing
     the string and using break to stop at any
     non-alpha char. dropWhile removes non-alpha
     chars, and the process repeats until the
@@ -102,7 +102,7 @@ main = do
   inContent <- readFile inFile
   dictContent <- readFile dictFile
   let inWords = insensitiveUniq $ splitWords inContent
-  let dictWords = splitWords dictContent
+  let dictWords = map (map toLower) $ splitWords dictContent
   outFileHandle <- openFile outFile WriteMode
   mapM (hPutStrLn outFileHandle) $ spellCheck inWords dictWords
   hClose outFileHandle
