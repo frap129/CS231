@@ -2,6 +2,7 @@
 import Data.List
 import Data.Char
 import System.Environment
+import System.Exit
 import System.IO
 
 {-
@@ -88,7 +89,8 @@ spellCheck (word:words) dict
 
 {-
     main is the controlling function of the program.
-    First, main reads in three arguments: the input
+    First, main verifies it was given 3 arguments.
+    Then, main reads in these arguments: the input
     file path, the dictionary file path, and the
     output file path. Next, it loads the contents of
     the input and dictionary files. Both files are
@@ -98,7 +100,12 @@ spellCheck (word:words) dict
     are written to the outputfile.
 -}
 main = do
-  [inFile, dictFile, outFile] <- getArgs
+  args <- getArgs
+  if length args /= 3 then
+    die ("Wrong number of arguments supplied")
+  else
+    return ()
+  let [inFile, dictFile, outFile] = args
   inContent <- readFile inFile
   dictContent <- readFile dictFile
   let inWords = insensitiveUniq $ splitWords inContent
