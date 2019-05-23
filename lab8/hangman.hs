@@ -7,7 +7,6 @@ import Data.Char
 import qualified Data.Map as Map
 
 type Family = (String, [String])
-alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
 printUsage :: IO a
 printUsage = do
@@ -83,7 +82,7 @@ gameLoop availWords pattern guesses numGuess debug
         let (newPattern, newWords) = largestFamily guess availWords pattern
         let newNumGuess = if checkGuess guess newWords then numGuess else numGuess - 1
         let prefix = if checkGuess guess newWords then "Correct! " else "Incorrect! "
-        let newGuesses = updateGuesses guess guesses alphabet
+        let newGuesses = updateGuesses guess guesses "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
         putStrLn $ prefix ++ "Guesses remaining: " ++ show newNumGuess
         putStrLn $ "Letters guessed: " ++ newGuesses
