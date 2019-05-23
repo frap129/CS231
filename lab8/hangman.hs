@@ -50,6 +50,12 @@ rightLenWords a len = [x | x <- a, length x == len]
 hiddenString :: Int -> String
 hiddenString len = (concat $ replicate len "_ ")
 
+updateGuesses :: Char -> String -> String -> String
+updateGuesses _ _ [] = []
+updateGuesses guess (x:xs) (y:ys)
+    | y == guess = y : xs
+    | otherwise  = x : updateGuesses guess xs ys
+
 afterGuess :: String -> Int -> String -> String -> Bool -> Int -> IO ()
 afterGuess prefix numGuess newGuesses userWord debug familySize = do
     putStrLn $ prefix ++ "Guesses remaining: " ++ show numGuess
@@ -80,7 +86,7 @@ gameLoop availWords userWord guesses numGuess debug
         let newUserWord = userView guess userWord $ head newWords
         let newNumGuess = if checkGuess guess newWords then numGuess else numGuess - 1
         let prefix = if checkGuess guess newWords then "Correct! " else "Incorrect! "
-        let newGuesses = userView guess guesses alphabet
+        let newGuesses = updateGuesses guess guesses alphabet
 
         afterGuess prefix newNumGuess newGuesses newUserWord debug (length newWords)
         gameLoop newWords newUserWord newGuesses newNumGuess debug
@@ -93,7 +99,7 @@ main = do
     else
         return ()
 
-    let (dictName, wordLen, numGuess, debug) = splitArgs (args ++ ["no"])
+    let (dictName, wordLen, numGuess, debug) = splitArgs (args ++ ["ignore"])
     dictContent <- readFile dictName
     let dictWords = map (map toUpper) $ rightLenWords (lines dictContent) wordLen
 
@@ -102,5 +108,5 @@ main = do
     else
         return ()
 
-    gameLoop dictWords (hiddenString wordLen) (hiddenString 26) numGuess debug
+    gameLoop dictWords (hiddenString wordLen) (replicate 26 ' ') numGuess debug
     return ()
