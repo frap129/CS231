@@ -21,9 +21,11 @@ checkArgs [_, _, _, s]
     | otherwise = 3
 checkArgs _ = 0
 
-splitArgs :: [String] -> (String, Int, Int, Bool)
-splitArgs [a, b, c, d] = (a, (read b), (read c), (d == "-s"))
-splitArgs [a, b, c, d, e] = (a, (read b), (read c), (d == "-s"))
+splitArgs :: [String] -> Int -> (String, Int, Int, Bool)
+splitArgs a numArgs
+    | numArgs == 4 = (a!!0, (read $ a!!1), (read $ a!!2), (a!!3 == "-s"))
+    | otherwise    = (a!!0, (read $ a!!1), (read $ a!!2), False)
+
 
 getPattern :: Char -> String -> String -> String
 getPattern _ _ [] = []
@@ -99,7 +101,7 @@ main = do
     else
         return ()
 
-    let (dictName, wordLen, numGuess, debug) = splitArgs (args ++ ["ignore"])
+    let (dictName, wordLen, numGuess, debug) = splitArgs args numArgs
     dictContent <- readFile dictName
     let dictWords = map (map toUpper) $ rightLenWords (lines dictContent) wordLen
 
