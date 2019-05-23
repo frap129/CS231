@@ -34,7 +34,7 @@ wordFamilies :: Char -> [String] -> Map.Map String [String]
 wordFamilies guessed words = foldr (\i -> Map.insertWith (++) (map (\x -> if x == guessed then x else '_') i) [i]) Map.empty words
 
 largestFamily :: Char -> [String] -> [String]
-largestFamily guessed words = head $ map snd $ sortByLength $ Map.toList $ wordFamilies guessed words
+largestFamily guessed words = snd $ head $ sortByLength $ Map.toList $ wordFamilies guessed words
 
 checkGuess :: Char -> [String] -> Bool
 checkGuess guess availWords
