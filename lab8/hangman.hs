@@ -26,7 +26,6 @@ splitArgs a numArgs
     | numArgs == 4 = (a!!0, (read $ a!!1), (read $ a!!2), (a!!3 == "-s"))
     | otherwise    = (a!!0, (read $ a!!1), (read $ a!!2), False)
 
-
 getPattern :: Char -> String -> String -> String
 getPattern _ _ [] = []
 getPattern letter (x:xs:xss) (y:ys)
@@ -96,10 +95,13 @@ gameLoop availWords pattern guesses numGuess debug
 main = do
     args <- getArgs
     let numArgs = checkArgs args
-    if numArgs == 0 then do
-        printUsage
+    if or [(numArgs == 3), (numArgs == 4)] then
+        if and $ map isDigit [(args!!1!!0), (args!!2!!0)] then
+            return ()
+        else
+            printUsage
     else
-        return ()
+        printUsage
 
     let (dictName, wordLen, numGuess, debug) = splitArgs args numArgs
     dictContent <- readFile dictName
