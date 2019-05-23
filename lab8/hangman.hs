@@ -6,6 +6,7 @@ import Data.List
 import Data.Char
 import qualified Data.Map as Map
 
+type Family = (String, [String])
 alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
 printUsage :: IO a
@@ -24,24 +25,24 @@ splitArgs :: [String] -> (String, Int, Int, Bool)
 splitArgs [a, b, c, d] = (a, (read b), (read c), (d == "-s"))
 splitArgs [a, b, c, d, e] = (a, (read b), (read c), (d == "-s"))
 
-userView :: Char -> String -> String -> String
-userView _ _ [] = []
-userView letter (x:xs:xss) (y:ys)
-    | letter == y = letter : ' ' : userView letter xss ys
-    | otherwise   = x : xs : userView letter xss ys
+getPattern :: Char -> String -> String -> String
+getPattern _ _ [] = []
+getPattern letter (x:xs:xss) (y:ys)
+    | letter == y = letter : ' ' : getPattern letter xss ys
+    | otherwise   = x : xs : getPattern letter xss ys
 
-wordFamilies :: Char -> [String] -> Map.Map String [String]
-wordFamilies guessed words = foldr (\i -> Map.insertWith (++) (map (\x -> if x == guessed then x else '_') i) [i]) Map.empty words
+wordFamilies :: Char -> [String] -> String -> [Family]
+wordFamilies guess words prevPattern = Map.toList $ foldr (\i -> Map.insertWith (++) (getPattern guess prevPattern i) [i]) Map.empty words
 
-largestFamily :: Char -> [String] -> [String]
-largestFamily guessed words = snd $ head $ sortByLength $ Map.toList $ wordFamilies guessed words
+largestFamily :: Char -> [String] -> String -> Family
+largestFamily guessed words pattern = head $ sortByLength $ wordFamilies guessed words pattern
 
 checkGuess :: Char -> [String] -> Bool
 checkGuess guess availWords
     | elem guess (availWords!!0) = True
     | otherwise                  = False
 
-sortByLength :: [(String, [String])] -> [(String, [String])]
+sortByLength :: [Family] -> [Family]
 sortByLength a = reverse $ sortBy (compare `on` length) a
 
 rightLenWords :: [String] -> Int -> [String]
@@ -57,10 +58,10 @@ updateGuesses guess (x:xs) (y:ys)
     | otherwise  = x : updateGuesses guess xs ys
 
 afterGuess :: String -> Int -> String -> String -> Bool -> Int -> IO ()
-afterGuess prefix numGuess newGuesses userWord debug familySize = do
+afterGuess prefix numGuess newGuesses pattern debug familySize = do
     putStrLn $ prefix ++ "Guesses remaining: " ++ show numGuess
     putStrLn $ "Letters guessed: " ++ newGuesses
-    putStrLn $ "Word so far: " ++ userWord
+    putStrLn $ "Word so far: " ++ pattern
     if debug then do putStrLn $ "Words in family: " ++ show familySize
     else return ()
 
@@ -78,18 +79,17 @@ askGuess prevGuesses = do
 
 gameLoop :: [String] -> String -> String -> Int -> Bool -> IO ()
 gameLoop availWords _ _ 0 _ = do putStrLn $ "Sorry, the word was " ++ head availWords
-gameLoop availWords userWord guesses numGuess debug
-    | not $ elem '_' userWord = do putStrLn "You win!"
-    | otherwise               = do
+gameLoop availWords pattern guesses numGuess debug
+    | not $ elem '_' pattern = do putStrLn "You win!"
+    | otherwise              = do
         guess <- askGuess guesses
-        let newWords = largestFamily guess availWords
-        let newUserWord = userView guess userWord $ head newWords
+        let (newPattern, newWords) = largestFamily guess availWords pattern
         let newNumGuess = if checkGuess guess newWords then numGuess else numGuess - 1
         let prefix = if checkGuess guess newWords then "Correct! " else "Incorrect! "
         let newGuesses = updateGuesses guess guesses alphabet
 
-        afterGuess prefix newNumGuess newGuesses newUserWord debug (length newWords)
-        gameLoop newWords newUserWord newGuesses newNumGuess debug
+        afterGuess prefix newNumGuess newGuesses newPattern debug (length newWords)
+        gameLoop newWords newPattern newGuesses newNumGuess debug
 
 main = do
     args <- getArgs
