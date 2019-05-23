@@ -57,14 +57,6 @@ updateGuesses guess (x:xs) (y:ys)
     | y == guess = y : xs
     | otherwise  = x : updateGuesses guess xs ys
 
-afterGuess :: String -> Int -> String -> String -> Bool -> Int -> IO ()
-afterGuess prefix numGuess newGuesses pattern debug familySize = do
-    putStrLn $ prefix ++ "Guesses remaining: " ++ show numGuess
-    putStrLn $ "Letters guessed: " ++ newGuesses
-    putStrLn $ "Word so far: " ++ pattern
-    if debug then do putStrLn $ "Words in family: " ++ show familySize
-    else return ()
-
 askGuess :: String -> IO Char
 askGuess prevGuesses = do
     putStrLn "Enter a guess:"
@@ -92,7 +84,11 @@ gameLoop availWords pattern guesses numGuess debug
         let prefix = if checkGuess guess newWords then "Correct! " else "Incorrect! "
         let newGuesses = updateGuesses guess guesses alphabet
 
-        afterGuess prefix newNumGuess newGuesses newPattern debug (length newWords)
+        putStrLn $ prefix ++ "Guesses remaining: " ++ show newNumGuess
+        putStrLn $ "Letters guessed: " ++ newGuesses
+        putStrLn $ "Word so far: " ++ newPattern
+        if debug then do putStrLn $ "Words in family: " ++ show (length newWords)
+        else return ()
         gameLoop newWords newPattern newGuesses newNumGuess debug
 
 main = do
