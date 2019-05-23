@@ -42,7 +42,7 @@ checkGuess guess availWords
     | otherwise                  = False
 
 sortByLength :: [(String, [String])] -> [(String, [String])]
-sortByLength a = sortBy (compare `on` length) a
+sortByLength a = reverse $ sortBy (compare `on` length) a
 
 rightLenWords :: [String] -> Int -> [String]
 rightLenWords a len = [x | x <- a, length x == len]
