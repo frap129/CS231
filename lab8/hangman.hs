@@ -69,7 +69,11 @@ askGuess :: String -> IO Char
 askGuess prevGuesses = do
     putStrLn "Enter a guess:"
     anyCase <- getLine
-    let guess = toUpper (anyCase!!0)
+    guess <-
+        if length anyCase > 0 then
+             return $ toUpper $ head anyCase
+        else
+            askGuess prevGuesses
     if elem guess prevGuesses then
         askGuess prevGuesses
     else if not $ isAlpha guess then
