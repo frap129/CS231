@@ -48,9 +48,6 @@ sortByLength a = reverse $ sortBy (compare `on` length) a
 rightLenWords :: [String] -> Int -> [String]
 rightLenWords a len = [x | x <- a, length x == len]
 
-hiddenString :: Int -> String
-hiddenString len = (concat $ replicate len "_ ")
-
 updateGuesses :: Char -> String -> String -> String
 updateGuesses _ _ [] = []
 updateGuesses guess (x:xs) (y:ys)
@@ -111,5 +108,5 @@ main = do
     else
         return ()
 
-    gameLoop dictWords (hiddenString wordLen) (replicate 26 ' ') numGuess debug
+    gameLoop dictWords (concat $ replicate word_len "_ ") (replicate 26 ' ') numGuess debug
     return ()
