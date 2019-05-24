@@ -199,4 +199,3 @@ main = do
         return ()
 
     gameLoop dictWords (concat $ replicate wordLen "_ ") (replicate 26 ' ') numGuess debug
-    return ()
