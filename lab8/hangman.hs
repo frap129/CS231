@@ -141,8 +141,9 @@ gameLoop availWords pattern guesses numGuess debug
     | otherwise              = do
         guess <- askGuess guesses
         let (newPattern, newWords) = largestFamily guess availWords pattern
-        let newNumGuess = if elem guess (newWords!!0) then numGuess else numGuess - 1
-        let prefix = if elem guess (newWords!!0) then "Correct! " else "Incorrect! "
+        let correct = elem guess (newWords!!0)
+        let newNumGuess = if correct then numGuess else numGuess - 1
+        let prefix = if correct then "Correct! " else "Incorrect! "
         let newGuesses = updateGuesses guess guesses "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
         putStrLn $ prefix ++ "Guesses remaining: " ++ show newNumGuess
