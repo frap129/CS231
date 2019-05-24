@@ -5,7 +5,7 @@ import System.IO
 import Data.Function
 import Data.List
 import Data.Char
-import qualified Data.Map as Map
+import Data.Map hiding (map, foldr)
 
 -- Family is a tuple of the patttern and a list of matching words
 type Family = (String, [String])
@@ -51,7 +51,7 @@ getPattern letter (x:xs:xss) (y:ys)
     Family and returned
 -}
 wordFamilies :: Char -> [String] -> String -> [Family]
-wordFamilies guess words prevPattern = Map.toList $ foldr (\x -> Map.insertWith (++) (getPattern guess prevPattern x) [x]) Map.empty words
+wordFamilies guess words prevPattern = toList $ foldr (\x -> insertWith (++) (getPattern guess prevPattern x) [x]) empty words
 
 {-
     largestFamily accepts a Char (the guessed letter), a list of
