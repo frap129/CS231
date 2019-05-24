@@ -188,7 +188,7 @@ main = do
     if numGuess > 4 && numGuess < 11 then
         return ()
     else
-        putStrLn "Number of guesses must be between 5 and 10."
+        die "Number of guesses must be between 5 and 10."
 
     dictContent <- readFile dictName
     let dictWords = map (map toUpper) $ rightLenWords (lines dictContent) wordLen
