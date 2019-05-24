@@ -14,7 +14,7 @@ type Family = (String, [String])
 printUsage :: IO a
 printUsage = do
     name <- getProgName
-    die ("Usage: ./" ++ name ++ " dictionary_path word_len num_guesses")
+    die ("Usage: ./" ++ name ++ " /path/to/dictionary <word length> <number of wrong guesses>")
 
 {-
     splitArgs accepts a list of strings (the passed arguments) and
