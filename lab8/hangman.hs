@@ -13,13 +13,6 @@ printUsage = do
     name <- getProgName
     die ("Usage: ./" ++ name ++ " dictionary_path word_len num_guesses")
 
-checkArgs :: [String] -> Int
-checkArgs [_, _, _] = 3
-checkArgs [_, _, _, s]
-    | s == "-s" = 4
-    | otherwise = 3
-checkArgs _ = 0
-
 splitArgs :: [String] -> Int -> (String, Int, Int, Bool)
 splitArgs a numArgs
     | numArgs == 4 = (a!!0, (read $ a!!1), (read $ a!!2), (a!!3 == "-s"))
@@ -90,8 +83,8 @@ gameLoop availWords pattern guesses numGuess debug
 
 main = do
     args <- getArgs
-    let numArgs = checkArgs args
-    if or [(numArgs == 3), (numArgs == 4)] then
+    let numArgs = length args
+    if numArgs == 3 || numArgs == 4 then
         if and $ map isDigit [(args!!1!!0), (args!!2!!0)] then
             return ()
         else
@@ -100,6 +93,12 @@ main = do
         printUsage
 
     let (dictName, wordLen, numGuess, debug) = splitArgs args numArgs
+
+    if numGuess > 4 && numGuess < 11 then
+        return ()
+    else
+        putStrLn "Number of guesses must be between 5 and 10."
+
     dictContent <- readFile dictName
     let dictWords = map (map toUpper) $ rightLenWords (lines dictContent) wordLen
 
@@ -108,5 +107,5 @@ main = do
     else
         return ()
 
-    gameLoop dictWords (concat $ replicate word_len "_ ") (replicate 26 ' ') numGuess debug
+    gameLoop dictWords (concat $ replicate wordLen "_ ") (replicate 26 ' ') numGuess debug
     return ()
