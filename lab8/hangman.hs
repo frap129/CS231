@@ -68,10 +68,6 @@ largestFamily guessed words pattern = head $ sortByLength $ wordFamilies guessed
 sortByLength :: [Family] -> [Family]
 sortByLength a = reverse $ sortBy (compare `on` length) a
 
--- rightLenWords removes elements of a list that aren't the given length
-rightLenWords :: [String] -> Int -> [String]
-rightLenWords a len = [x | x <- a, length x == len]
-
 {-
     updateGuesses is the same as get pattern, but uses as single
     space as a blank rather than an underscore and a space. It
@@ -192,7 +188,7 @@ main = do
         die "Number of guesses must be between 5 and 10."
 
     dictContent <- readFile dictName
-    let dictWords = map (map toUpper) $ rightLenWords (lines dictContent) wordLen
+    let dictWords = map (map toUpper) $ (\a -> [x | x <- a, length x == wordLen]) (lines dictContent)
 
     if dictWords == [] then do
         die "The dictionary doesn\'t have any words of that length"
