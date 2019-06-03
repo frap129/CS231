@@ -66,7 +66,11 @@ largestFamily guessed words pattern = head $ sortByLength $ wordFamilies guessed
 
 -- sortByLength sorts a list by length, in decending order
 sortByLength :: [Family] -> [Family]
-sortByLength a = reverse $ sortBy (compare `on` length) a
+sortByLength a = reverse $ sortBy compareLength a
+
+-- compareLength compares length of 2 families
+compareLength :: Family -> Family -> Ordering
+compareLength a b = compare (length $ snd a) (length $ snd b)
 
 {-
     updateGuesses is the same as get pattern, but uses as single
