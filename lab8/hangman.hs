@@ -119,26 +119,33 @@ askGuess prevGuesses = do
     losing condition is executed if the number of wrong guesses
     remaining is 0. The wining condition is executed if the
     pattern no longer contains underscores. If neither of these
-    conditions are met, the main game logic executes. First, the
-    user is asked to enter a guess. The function uses the guess
-    to update the list of words and the word pattern. If the
-    guessed letter is an element of a word in the remaining
-    family, the guess is correct. If the guess is correct, the
-    program prints correct. If it is incorrect, the program
-    prints incorrect and decrements the remaining guesses.
-    The next step is to print game state info including the
-    guesses remaining, the letters guessed so far, and the
-    current word pattern. If debuging is enabled, the number of
-    words remaining is also printed. Finally, the game makes a
-    recursive call to itself with the new game data as the
-    parameters. This continues until either the win or lose
-    conditions are met.
+    conditions are met, the main game logic executes. First, we
+    print game state info including the guesses remaining, the
+    letters guessed so far, and the current word pattern. If
+    debuging is enabled, the number of words remaining is also
+    printed. user is asked to enter a guess. Next, the user is
+    prompted to enter a guess using the askGuess function. Once
+    a guess is stored, we call the largestFamily function.The
+    function uses the guess to update the list of words and the
+    word pattern. If the guessed letter is an element of a word
+    in the remaining family, the guess is correct. If the guess
+    is correct, the program prints correct. If it is incorrect,
+    the program prints incorrect and decrements the remaining
+    guesses. Finally, the game makes a recursive call to itself
+    with the new game data as the parameters. This continues until
+    either the win or lose conditions are met.
 -}
 gameLoop :: [String] -> String -> String -> Int -> Bool -> IO ()
 gameLoop availWords _ _ 0 _ = do putStrLn $ "Sorry, the word was " ++ head availWords
 gameLoop availWords pattern guesses numGuess debug
     | not $ elem '_' pattern = do putStrLn "You win!"
     | otherwise              = do
+        putStrLn $ "Guesses remaining: " ++ show numGuess
+        putStrLn $ "Letters guessed: " ++ guesses
+        putStrLn $ "Word so far: " ++ pattern
+        if debug then do putStrLn $ "Words in family: " ++ show (length availWords)
+        else return ()
+
         guess <- askGuess guesses
         let (newPattern, newWords) = largestFamily guess availWords pattern
         let correct = elem guess (newWords!!0)
@@ -146,11 +153,7 @@ gameLoop availWords pattern guesses numGuess debug
         let prefix = if correct then "Correct! " else "Incorrect! "
         let newGuesses = updateGuesses guess guesses "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
-        putStrLn $ prefix ++ "Guesses remaining: " ++ show newNumGuess
-        putStrLn $ "Letters guessed: " ++ newGuesses
-        putStrLn $ "Word so far: " ++ newPattern
-        if debug then do putStrLn $ "Words in family: " ++ show (length newWords)
-        else return ()
+        putStrLn prefix
         gameLoop newWords newPattern newGuesses newNumGuess debug
 
 {-
