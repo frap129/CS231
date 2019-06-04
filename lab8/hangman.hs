@@ -27,6 +27,14 @@ splitArgs a numArgs
     | numArgs == 4 = (a!!0, (read $ a!!1), (read $ a!!2), (a!!3 == "-s"))
     | otherwise    = (a!!0, (read $ a!!1), (read $ a!!2), False)
 
+-- fixGuess ensures that an int is between 5 and 10
+fixGuess :: Int -> Int
+fixGuess x
+    | x > 10    = 10
+    | x < 5     = 5
+    | otherwise = x
+
+
 {-
     getPattern accepts a Char (the guessed letter), and 2 strings.
     The first string is the previous pattern (can be all underscores
@@ -187,12 +195,8 @@ main = do
     else
         printUsage
 
-    let (dictName, wordLen, numGuess, debug) = splitArgs args numArgs
-
-    if numGuess > 4 && numGuess < 11 then
-        return ()
-    else
-        die "Number of guesses must be between 5 and 10."
+    let (dictName, wordLen, guesses, debug) = splitArgs args numArgs
+    let numGuess = fixGuess guesses
 
     dictContent <- readFile dictName
     let dictWords = map (map toUpper) $ (\a -> [x | x <- a, length x == wordLen]) (lines dictContent)
