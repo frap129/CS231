@@ -5,7 +5,7 @@ import System.IO
 import Data.Function
 import Data.List
 import Data.Char
-import Data.Map hiding (map, foldr)
+import Data.Map hiding (map, foldr) -- Data.Map.map and Data.map.foldr conflict with Data.List
 
 -- Family is a tuple of the patttern and a list of matching words
 type Family = (String, [String])
@@ -56,7 +56,7 @@ getPattern letter (x:xs:xss) (y:ys)
     the key is the pattern and the value is the words. By folding this
     across the list of words, we get a map containing pattern keys and
     matching word lists as the value. This is converted to a list of
-    Family and returned
+    Family and returned.
 -}
 wordFamilies :: Char -> [String] -> String -> [Family]
 wordFamilies guess words prevPattern = toList $ foldr (\x -> insertWith (++) (getPattern guess prevPattern x) [x]) empty words
@@ -199,10 +199,10 @@ main = do
     let numGuess = fixGuess guesses
 
     dictContent <- readFile dictName
-    let dictWords = map (map toUpper) $ (\a -> [x | x <- a, length x == wordLen]) (lines dictContent)
+    let dictWords = map (map toUpper) $ (\a -> [x | x <- a, length x == wordLen]) (words dictContent)
 
     if dictWords == [] then do
-        die "The dictionary doesn\'t have any words of that length"
+        die "The dictionary doesn\'t have any words of that length."
     else
         return ()
 
