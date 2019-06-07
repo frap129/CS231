@@ -146,7 +146,7 @@ askGuess prevGuesses = do
 gameLoop :: [String] -> String -> String -> Int -> Bool -> IO ()
 gameLoop availWords _ _ 0 _ = do putStrLn $ "Sorry, the word was " ++ head availWords
 gameLoop availWords pattern guesses numGuess debug
-    | not $ elem '_' pattern = do putStrLn "You win!"
+    | not $ elem '_' pattern = do putStrLn $ "Congratulations! The word was " ++ (map toLower $ availWords!!0)
     | otherwise              = do
         putStrLn $ "Guesses remaining: " ++ show numGuess
         putStrLn $ "Letters guessed: " ++ guesses
